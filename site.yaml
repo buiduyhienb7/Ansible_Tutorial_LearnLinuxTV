@@ -50,6 +50,29 @@
       group: root
       mode: 0644
 
+  - name: start and enable httpd (AlmaLinux)
+    tags: apache,alma,httpd
+    service:
+      name: httpd
+      state: started
+      enabled: yes
+    when: ansible_distribution == "AlmaLinux"
+
+  - name: change e-mail address for admin (AlmaLinux)
+    tags: apache,httpd,alma
+    lineinfile:
+      path: /etc/httpd/conf/httpd.conf
+      regexp: '^ServerAdmin'
+      line: ServerAdmin somebody@somewhere.net
+    when: ansible_distribution == "AlmaLinux"
+    register: httpd
+
+  - name: restart httpd (AlmaLinux)
+    tags: apache,alma,httpd
+    service:
+      name: httpd
+      state: restarted
+    when: httpd.changed
 
 - hosts: db_servers
   become: true
