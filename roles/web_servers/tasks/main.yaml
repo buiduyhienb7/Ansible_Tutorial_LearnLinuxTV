@@ -1,20 +1,10 @@
-- name: install apache2 package on Ubuntu
-  tags: apache,apache2,ubuntu
-  apt:
+- name: install apache packages
+  tags: apache,apache2,ubuntu,alma
+  package:
     name:
-    - apache2
-    - libapache2-mod-php
+    - "{{ apache_package }}"
+    - "{{ php_package }}"
     state: latest
-  when: ansible_distribution == "Ubuntu"
-
-- name: install httpd package on AlmaLinux
-  tags: apache,httpd,alma
-  dnf:
-    name:
-    - httpd
-    - php
-    state: latest
-  when: ansible_distribution == "AlmaLinux"
 
 - name: copy default html file for site
   tags: apache,apache2,httpd
@@ -28,10 +18,9 @@
 - name: start and enable httpd (AlmaLinux)
   tags: apache,alma,httpd
   service:
-    name: httpd
+    name: "{{ apache_package }}"
     state: started
     enabled: yes
-  when: ansible_distribution == "AlmaLinux"
 
 - name: change email address for admin (AlmaLinux)
   tags: apache,httpd,alma
@@ -40,12 +29,4 @@
     regexp: '^ServerAdmin'
     line: ServerAdmin somebody@somewhere.net
   when: ansible_distribution == "AlmaLinux"
-  register: httpd
-
-- name: restart httpd (AlmaLinux)
-  tags: apache,alma,httpd
-  service:
-    name: httpd
-    state: restarted
-  when: httpd.changed
-
+  notify: restart_apache
