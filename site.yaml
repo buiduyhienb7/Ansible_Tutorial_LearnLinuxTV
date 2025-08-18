@@ -21,94 +21,23 @@
 
 - hosts: all
   become: true
-  tasks:
+  roles:
+  - base
 
-  - name: add ssh key for ansible user
-    authorized_key:
-      user: ansible
-      key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOwiUmuJRFWfDW8fBVqIj+sLwARGRqTQK1Kd5c53We+P ansible"
- 
 
 - hosts: web_servers
   become: true
-  tasks:
- 
-  - name: install apache2 package on Ubuntu
-    tags: apache,apache2,ubuntu
-    apt:
-      name:
-      - apache2
-      - libapache2-mod-php
-      state: latest
-    when: ansible_distribution == "Ubuntu"
+  roles:
+  - web_servers
 
-  - name: install httpd package on AlmaLinux
-    tags: apache,httpd,alma
-    dnf:
-      name:
-      - httpd
-      - php
-      state: latest
-    when: ansible_distribution == "AlmaLinux"
-
-  - name: copy default html file for site
-    tags: apache,apache2,httpd
-    copy:
-      src: default_site.html
-      dest: /var/www/html/index.html
-      owner: root
-      group: root
-      mode: 0644
-
-  - name: start and enable httpd (AlmaLinux)
-    tags: apache,alma,httpd
-    service:
-      name: httpd
-      state: started
-      enabled: yes
-    when: ansible_distribution == "AlmaLinux"
-
-  - name: change e-mail address for admin (AlmaLinux)
-    tags: apache,httpd,alma
-    lineinfile:
-      path: /etc/httpd/conf/httpd.conf
-      regexp: '^ServerAdmin'
-      line: ServerAdmin somebody@somewhere.net
-    when: ansible_distribution == "AlmaLinux"
-    register: httpd
-
-  - name: restart httpd (AlmaLinux)
-    tags: apache,alma,httpd
-    service:
-      name: httpd
-      state: restarted
-    when: httpd.changed
 
 - hosts: db_servers
   become: true
-  tasks:
-
-  - name: install mariadb package (Ubuntu)
-    tags: db,mariadb-server,ubuntu
-    apt:
-      name: mariadb-server
-      state: latest
-    when: ansible_distribution == "Ubuntu"
-
-  - name: install mariadb package (AlmaLinux)
-    tags: db,mariadb,centos
-    dnf:
-      name: mariadb
-      state: latest
-    when: ansible_distribution == "AlmaLinux"
+  roles:
+  - db_servers
 
 
 - hosts: file_servers
   become: true
-  tasks:
-
-  - name: install samba package (Ubuntu and AlmaLinux)
-    tags: samba
-    package:
-      name: samba
-      state: latest
+  roles:
+  - file_servers
