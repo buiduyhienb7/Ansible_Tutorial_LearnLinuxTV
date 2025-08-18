@@ -1,0 +1,42 @@
+---
+
+- hosts: all
+  become: true
+  pre_tasks:
+
+  - name: install updates (Ubuntu)
+    tags: always
+    apt:
+      upgrade: dist
+      update_cache: yes
+    when: ansible_distribution == "Ubuntu"
+
+  - name: install updates (AlmaLinux)
+    tags: always
+    dnf:
+      update_only: yes
+      update_cache: yes
+    when: ansible_distribution == "AlmaLinux"
+
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name: create ansible user
+    user:
+      name: ansible
+      groups: root
+
+  - name: add ssh key for ansible user
+    authorized_key:
+      user: ansible
+      key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOwiUmuJRFWfDW8fBVqIj+sLwARGRqTQK1Kd5c53We+P ansible"
+
+  - name: add sudoer file for ansible user
+    copy:
+      src: sudoer_ansible
+      dest: /etc/sudoers.d/ansible
+      owner: root
+      group: root
+      mode: 0440
