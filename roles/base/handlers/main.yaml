@@ -1,0 +1,12 @@
+- name: restart_sshd (AlmaLinux)
+  service:
+    name: sshd
+    state: restarted
+  when: ansible_distribution == "AlmaLinux"
+
+- name: restart_sshd (Ubuntu)
+  service:
+    name: ssh
+    state: restarted
+  when: ansible_distribution == "Ubuntu"
+
