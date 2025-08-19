@@ -1333,4 +1333,35 @@ roles/web_server/handlers/main.yaml
     mode: 0644
 ```
 
-##16 Templates
+### 16. Templates
+- Create the directory for templates in roles/base: `mkdir templales`
+- Copy the ssd config file from a server to this directory with the *.j2 extension (sshd_config located at /etc/ssh/sshd_config): `sshd_config_ubuntu.j2`
+- Adding a variable inside the openssh config file template: `AllowUsers {{ ssh_user }}`
+- Adding the variable to a host:
+```yaml
+ssh_users: "jay simone"
+ssh_template_file: sshd_config_ubuntu.j2
+```
+- Having ansible render the template (Inside the base role, in the main.yml file, add this play):
+```yaml
+- name: openssh | generate sshd_config file from template
+   tags: ssh
+   template:
+     src: "Template:Ssh template file"
+     dest: /etc/ssh/sshd_config
+     owner: root
+     group: root
+     mode: 0644
+   notify: restart_sshd
+```
+- Create a handler to restart the openssh daemon:
+- Inside the base role, create a directory for handlers: `mkdir handlers`
+- Go inside that directory, and create a main.yaml file: vi handlers/main.yaml
+
+```yaml
+ - name: restart_sshd
+   service:
+     name: sshd
+     state: restarted
+```
+- Run the playbook: `ansible-playbook site.yml`
